@@ -2,7 +2,7 @@
   "name": "DragMenus",
   "version": "0.0.1",
   "description": "Forms that work via dragging and pie menus",
-  "main": "./dist/index.js",
+  "main": "./js/index.js",
   "directories": {
     "test": "test"
   },
@@ -12,13 +12,9 @@
   "devDependencies": {
     "jshint": "^2.8.0",
     "precommit-hook": "^3.0.0",
-    "babel-cli": "^6.26.0",
-    "babel-polyfill": "^6.7.4",
-    "babel-preset-env": "^1.6.0",
-    "babelify": "^7.2.0"
+    "babel-preset-env": "^1.6.0"
   },
   "scripts": {
-    "build": "./node_modules/babel-cli/bin/babel.js js -d dist",
     "jshint-pre-commit": "./scripts/jshint-pre-commit.sh",
     "validate": "npm ls",
     "lint": "jshint ."
@@ -26,6 +22,9 @@
   "repository": {
     "type": "git",
     "url": "git@github.com:hirenj/DragMenus.git"
+  },
+  "browserify": {
+    "transform": ["babelify"]
   },
   "author": "",
   "license": "TBD",
