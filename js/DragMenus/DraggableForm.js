@@ -55,7 +55,8 @@ const wire_menu_events = (piemenu) => {
         clearTimeout(piemenu.form.menu_timeout);
       }
 
-      let nextmenu = piemenu.ownerDocument.getElementById(piemenu.getAttribute('data-next'));
+      let nextmenu = piemenu.getRootNode().getElementById(piemenu.getAttribute('data-next'));
+
       if (! nextmenu ) {
         return;
       }
