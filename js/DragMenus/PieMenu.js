@@ -147,9 +147,6 @@ class PieMenu extends WrapHTML {
 
     let shadowRoot = this.attachShadow({mode: 'open'});
     shadowRoot.appendChild(tmpl.content.cloneNode(true));
-    let sectorsvg = shadowRoot.getElementById('sectorsvg');
-    let targetsector = this.parentNode.appendChild(this.parentNode.ownerDocument.importNode(sectorsvg,true));
-    this.sectorpath = targetsector.firstElementChild.firstElementChild.firstElementChild;
     this.hoverstyles = shadowRoot.getElementById('angles');
     if (! this.hoverstyles) {
       this.hoverstyles = document.createElement('style');
@@ -157,13 +154,17 @@ class PieMenu extends WrapHTML {
       this.hoverstyles.setAttribute('type','text/css');
       console.log(this.hoverstyles);
     }
-    let slot = shadowRoot.getElementById('items');
-    upgrade_elements.bind(this)(slot);
     // ShadyCSS.styleElement(this);
   }
 
   connectedCallback() {
+    let sectorsvg = this.shadowRoot.getElementById('sectorsvg');
+    let targetsector = this.parentNode.appendChild(this.parentNode.ownerDocument.importNode(sectorsvg,true));
+    this.sectorpath = targetsector.firstElementChild.firstElementChild.firstElementChild;
+
     let slot = this.shadowRoot.getElementById('items');
+    upgrade_elements.bind(this)(slot);
+
     this.style.setProperty('--sectorid','url(#'+this.sectorpath.parentNode.getAttribute('id')+')');
 
     slot.addEventListener('slotchange', upgrade_elements.bind(this,slot));
