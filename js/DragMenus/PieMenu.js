@@ -23,6 +23,7 @@ tmpl.innerHTML = `
       --end-angle: 60;
       --notch-ratio: 0.075;
       --icon-position-ratio: 0.2;
+      --icon-size: 10px;
       --sectorid: url(#sectorWeight1);
     }
     :host([active]) {
