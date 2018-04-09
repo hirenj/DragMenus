@@ -92,7 +92,7 @@ const wire_menu_events = (piemenu) => {
       clearTimeout(piemenu.form.menu_timeout);
       let sizing = piemenu.getBoundingClientRect();
       piemenu.removeAttribute('active');
-      let nextmenu = piemenu.ownerDocument.getElementById(piemenu.getAttribute('data-next'));
+      let nextmenu = piemenu.getRootNode().getElementById(piemenu.getAttribute('data-next'));
       if (! nextmenu ) {
         var event = new Event('submit',{bubbles: true});
         piemenu.form.dispatchEvent(event);

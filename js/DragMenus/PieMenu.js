@@ -148,7 +148,7 @@ class PieMenu extends WrapHTML {
     let shadowRoot = this.attachShadow({mode: 'open'});
     shadowRoot.appendChild(tmpl.content.cloneNode(true));
     let sectorsvg = shadowRoot.getElementById('sectorsvg');
-    let targetsector = this.ownerDocument.body.appendChild(this.ownerDocument.importNode(sectorsvg,true));
+    let targetsector = this.parentNode.appendChild(this.parentNode.ownerDocument.importNode(sectorsvg,true));
     this.sectorpath = targetsector.firstElementChild.firstElementChild.firstElementChild;
     this.hoverstyles = shadowRoot.getElementById('angles');
     if (! this.hoverstyles) {
@@ -164,6 +164,8 @@ class PieMenu extends WrapHTML {
 
   connectedCallback() {
     let slot = this.shadowRoot.getElementById('items');
+    this.style.setProperty('--sectorid','url(#'+this.sectorpath.parentNode.getAttribute('id')+')');
+
     slot.addEventListener('slotchange', upgrade_elements.bind(this,slot));
     slot.addEventListener('slotchange', () => {
       this.style.setProperty('--sectorid','url(#'+this.sectorpath.parentNode.getAttribute('id')+')');
