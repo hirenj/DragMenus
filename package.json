@@ -12,6 +12,7 @@
   "devDependencies": {
     "jshint": "^2.8.0",
     "precommit-hook": "^3.0.0",
+    "babelify": "^7.2.0",
     "babel-preset-env": "^1.6.0"
   },
   "scripts": {
