@@ -11,7 +11,6 @@ const wire_form_startdrag = (form) => {
     evt.stopPropagation();
   },{capture: false});
   form.addEventListener('drag', evt => {
-    console.log(evt.__target);
     if (evt.__target) {
       evt.__target.click();
     } else {
