@@ -146,13 +146,13 @@ class PieMenu extends WrapHTML {
   constructor() {
     super();
     log('Initiating custom PieMenu element');
-
-    let shadowRoot = this.attachShadow({mode: 'open'});
-    shadowRoot.appendChild(tmpl.content.cloneNode(true));
     ShadyCSS.styleElement(this);
+    this.attachShadow({mode: 'open'});
+    this.shadowRoot.appendChild(tmpl.content.cloneNode(true));
   }
 
   connectedCallback() {
+
     this.hoverstyles = this.shadowRoot.getElementById('angles');
     if (! this.hoverstyles) {
       this.hoverstyles = document.createElement('style');

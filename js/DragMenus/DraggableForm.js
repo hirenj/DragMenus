@@ -20,9 +20,10 @@ const clear_menus = (form) => {
 
 const wire_form_reset = (form) => {
   console.log('Wiring reset',form);
-  form.addEventListener('submit', (evt) => {
+  form.addEventListener('finished', (evt) => {
     evt.preventDefault();
-  },{capture: false});
+    return false;
+  });
 
   form.addEventListener('reset', () => {
     clear_menus(form);
@@ -87,7 +88,7 @@ const wire_menu_events = (piemenu) => {
 
       targ.checked = true;
       if ( ! ev.isTrusted ) {
-        ev.preventDefault();        
+        ev.preventDefault();
       }
 
       clearTimeout(piemenu.form.menu_timeout);
@@ -95,7 +96,7 @@ const wire_menu_events = (piemenu) => {
       piemenu.removeAttribute('active');
       let nextmenu = piemenu.getRootNode().getElementById(piemenu.getAttribute('data-next'));
       if (! nextmenu ) {
-        var event = new Event('submit',{bubbles: true});
+        var event = new Event('finished',{bubbles: true});
         piemenu.form.dispatchEvent(event);
         return;
       }
