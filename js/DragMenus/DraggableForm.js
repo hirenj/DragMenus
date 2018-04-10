@@ -2,7 +2,22 @@
 'use strict';
 
 const wire_form_startdrag = (form) => {
-  form.addEventListener('dragstart', evt => { evt.stopPropagation(); evt.target.click(); });
+  form.addEventListener('dragstart', evt => {
+    if (evt.__target) {
+      evt.__target.click();
+    } else {
+      evt.target.click();
+    }
+    evt.stopPropagation();
+  },{capture: false});
+  form.addEventListener('drag', evt => {
+    console.log(evt.__target);
+    if (evt.__target) {
+      evt.__target.click();
+    } else {
+      evt.target.click();
+    }
+  });
 };
 
 const wire_form_enddrag = (form) => {
