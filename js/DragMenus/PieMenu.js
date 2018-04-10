@@ -1,4 +1,4 @@
-/* globals document,HTMLElement,customElements,window */
+/* globals document,HTMLElement,customElements,window,ShadyCSS */
 'use strict';
 
 import * as debug from 'debug-any-level';
@@ -29,7 +29,8 @@ tmpl.innerHTML = `
     :host([active]) {
       transform: scale(1);
     }
-    :host *::slotted(*) {
+
+    :host ::slotted(*) {
       background: #eee;
       border: 0;
       color: black;
@@ -42,6 +43,7 @@ tmpl.innerHTML = `
       -webkit-clip-path: var(--sectorid);
       clip-path: var(--sectorid);
     }
+
   </style>
   <style id="angles">
   </style>
@@ -121,7 +123,8 @@ const upgrade_elements = function(slot) {
     classname = classname.replace(/[-\.]/g,'x');
     item.setAttribute('class',classname);
 
-    let basic_styles = `:host([active]) *::slotted(.${classname}) { transform: rotate(${str(-1*angle)}deg) !important; }`;
+    let basic_styles = `:host([active]) ::slotted(.${classname}) { transform: rotate(${str(-1*angle)}deg) !important; }`;
+    basic_styles = `x-piemenu[active] .${classname} { transform: rotate(${str(-1*angle)}deg) !important; }`;
 
     all_styles.push(basic_styles);
     angle += delta;
@@ -130,15 +133,14 @@ const upgrade_elements = function(slot) {
   // let temp_template = document.createElement('template');
   // temp_template.innerHTML = '<style type="text/css">'+all_styles.join('\n')+'</style>';
   // ShadyCSS.prepareTemplate(temp_template,'x-piemenu');
-  // this.hoverstyles.innerHTML = temp_template.innerHTML;
+  // this.hoverstyles.innerHTML = temp_template.content.cloneNode(true).textContent;
 };
 
 function WrapHTML() { return Reflect.construct(HTMLElement, [], Object.getPrototypeOf(this).constructor); }
 Object.setPrototypeOf(WrapHTML.prototype, HTMLElement.prototype);
 Object.setPrototypeOf(WrapHTML, HTMLElement);
 
-// ShadyCSS.prepareTemplate(tmpl,'x-piemenu');
-
+ShadyCSS.prepareTemplate(tmpl,'x-piemenu');
 
 class PieMenu extends WrapHTML {
   constructor() {
@@ -147,17 +149,18 @@ class PieMenu extends WrapHTML {
 
     let shadowRoot = this.attachShadow({mode: 'open'});
     shadowRoot.appendChild(tmpl.content.cloneNode(true));
-    this.hoverstyles = shadowRoot.getElementById('angles');
+    ShadyCSS.styleElement(this);
+  }
+
+  connectedCallback() {
+    this.hoverstyles = this.shadowRoot.getElementById('angles');
     if (! this.hoverstyles) {
       this.hoverstyles = document.createElement('style');
       this.parentNode.appendChild(this.hoverstyles);
       this.hoverstyles.setAttribute('type','text/css');
       console.log(this.hoverstyles);
     }
-    // ShadyCSS.styleElement(this);
-  }
 
-  connectedCallback() {
     let sectorsvg = this.shadowRoot.getElementById('sectorsvg');
     let targetsector = this.parentNode.appendChild(this.parentNode.ownerDocument.importNode(sectorsvg,true));
     this.sectorpath = targetsector.firstElementChild.firstElementChild.firstElementChild;
