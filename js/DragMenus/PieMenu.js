@@ -123,8 +123,7 @@ const upgrade_elements = function(slot) {
     classname = classname.replace(/[-\.]/g,'x');
     item.setAttribute('class',classname);
 
-    let basic_styles = `:host([active]) ::slotted(.${classname}) { transform: rotate(${str(-1*angle)}deg) !important; }`;
-    basic_styles = `x-piemenu[active] .${classname} { transform: rotate(${str(-1*angle)}deg) !important; }`;
+    let basic_styles = window.ShadyCSS ? `x-piemenu[active] .${classname} { transform: rotate(${str(-1*angle)}deg) !important; }` : `:host([active]) ::slotted(.${classname}) { transform: rotate(${str(-1*angle)}deg) !important; }`;
 
     all_styles.push(basic_styles);
     angle += delta;
@@ -139,26 +138,29 @@ const upgrade_elements = function(slot) {
 function WrapHTML() { return Reflect.construct(HTMLElement, [], Object.getPrototypeOf(this).constructor); }
 Object.setPrototypeOf(WrapHTML.prototype, HTMLElement.prototype);
 Object.setPrototypeOf(WrapHTML, HTMLElement);
-
-ShadyCSS.prepareTemplate(tmpl,'x-piemenu');
+if (window.ShadyCSS) {
+  ShadyCSS.prepareTemplate(tmpl,'x-piemenu');
+}
 
 class PieMenu extends WrapHTML {
   constructor() {
     super();
     log('Initiating custom PieMenu element');
-    ShadyCSS.styleElement(this);
-    this.attachShadow({mode: 'open'});
-    this.shadowRoot.appendChild(tmpl.content.cloneNode(true));
+    if (window.ShadyCSS) {
+      ShadyCSS.styleElement(this);
+    }
   }
 
   connectedCallback() {
+    this.attachShadow({mode: 'open'});
+    this.shadowRoot.appendChild(tmpl.content.cloneNode(true));
 
     this.hoverstyles = this.shadowRoot.getElementById('angles');
+
     if (! this.hoverstyles) {
       this.hoverstyles = document.createElement('style');
-      this.parentNode.appendChild(this.hoverstyles);
+      this.shadowRoot.appendChild(this.hoverstyles);
       this.hoverstyles.setAttribute('type','text/css');
-      console.log(this.hoverstyles);
     }
 
     let sectorsvg = this.shadowRoot.getElementById('sectorsvg');
