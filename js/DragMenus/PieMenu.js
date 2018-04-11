@@ -1,4 +1,4 @@
-/* globals document,HTMLElement,customElements,window,ShadyCSS */
+/* globals document,HTMLElement,customElements,window,ShadyCSS,MutationObserver */
 'use strict';
 
 import * as debug from 'debug-any-level';
@@ -60,6 +60,27 @@ tmpl.innerHTML = `
 const str = (num) => num.toFixed(PRECISION);
 const ang = (num) => num.toFixed(3);
 
+const wire_attribute_watcher = (label,action) => {
+  let config = { attributes: true, subtree: true,attributeFilter: ['disabled'] };
+
+  // Callback function to execute when mutations are observed
+  let callback = function(mutationsList) {
+      for(let mutation of mutationsList) {
+          if (mutation.type == 'attributes') {
+              clearTimeout(wire_attribute_watcher.timeout);
+              wire_attribute_watcher.timeout = setTimeout(action,0);
+          }
+      }
+  };
+
+  let observer = new MutationObserver(callback);
+
+  observer.observe(label, config);
+
+  // Later, you can stop observing
+  // observer.disconnect();
+};
+
 
 const upgrade_elements = function(slot) {
   let items = slot.assignedNodes();
@@ -67,7 +88,8 @@ const upgrade_elements = function(slot) {
   let max_time = 0.3;
   let angle = 0;
   let all_styles = [];
-  let all_items = items.filter( item => item instanceof HTMLElement );
+  let all_items = items.filter( item => item instanceof HTMLElement )
+                       .filter( item => item.querySelector('input:not([disabled])') );
   let start_angle = -60;
   let end_angle = 60;
 
@@ -88,6 +110,11 @@ const upgrade_elements = function(slot) {
   }
 
   const icon_min_ratio = parseFloat(actual_style.getPropertyValue('--icon-position-ratio'));
+
+  let redo_upgrade = () => {
+    upgrade_elements.bind(this)(slot);
+    this.style.setProperty('--sectorid','url(#'+this.sectorpath.parentNode.getAttribute('id')+')');
+  };
 
   for(let item of all_items.reverse()) {
     delta = base_delta * parseInt(item.getAttribute('weight') || '1');
@@ -127,6 +154,7 @@ const upgrade_elements = function(slot) {
 
     all_styles.push(basic_styles);
     angle += delta;
+    wire_attribute_watcher(item, redo_upgrade);
   }
   this.hoverstyles.innerHTML = all_styles.join('\n');
   // let temp_template = document.createElement('template');
@@ -134,6 +162,7 @@ const upgrade_elements = function(slot) {
   // ShadyCSS.prepareTemplate(temp_template,'x-piemenu');
   // this.hoverstyles.innerHTML = temp_template.content.cloneNode(true).textContent;
 };
+
 
 function WrapHTML() { return Reflect.construct(HTMLElement, [], Object.getPrototypeOf(this).constructor); }
 Object.setPrototypeOf(WrapHTML.prototype, HTMLElement.prototype);
