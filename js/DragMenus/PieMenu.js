@@ -44,6 +44,10 @@ tmpl.innerHTML = `
       clip-path: var(--sectorid);
     }
 
+    :host ::slotted(*[data-disabled]) {
+      display: none;
+    }
+
   </style>
   <style id="angles">
   </style>
@@ -68,6 +72,11 @@ const wire_attribute_watcher = (label,action) => {
       for(let mutation of mutationsList) {
           if (mutation.type == 'attributes') {
               clearTimeout(wire_attribute_watcher.timeout);
+              if (label.querySelector('input[disabled]')) {
+                label.setAttribute('data-disabled','');
+              } else {
+                label.removeAttribute('data-disabled');
+              }
               wire_attribute_watcher.timeout = setTimeout(action,0);
           }
       }
