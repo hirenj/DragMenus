@@ -1,9 +1,9 @@
-/* globals document,DragDropTouch,Event,window */
+/* globals document,Event,window */
 'use strict';
 
-if (typeof window.DragDropTouch === 'undefined') {
-  window.DragDropTouch = { prototype: {} };
-}
+import * as DragDropTouchClass from '../../lib/dragdroptouch';
+
+const DragDropTouch = DragDropTouchClass.DragDropTouch;
 
 const shim_dispatch = function(e,type,target) {
   let related = null;
