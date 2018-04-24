@@ -65,22 +65,35 @@ const str = (num) => num.toFixed(PRECISION);
 const ang = (num) => num.toFixed(3);
 
 const wire_attribute_watcher = (label,action) => {
-  let config = { attributes: true, subtree: true,attributeFilter: ['disabled'] };
+  let config = { attributes: true, subtree: true,attributeFilter: ['disabled','data-weight'] };
 
   // Callback function to execute when mutations are observed
   let callback = function(mutationsList) {
       for(let mutation of mutationsList) {
-          if (mutation.type == 'attributes') {
-              clearTimeout(wire_attribute_watcher.timeout);
-              if (label.querySelector('input[disabled]')) {
-                label.setAttribute('data-disabled','');
-              } else {
-                label.removeAttribute('data-disabled');
-              }
-              wire_attribute_watcher.timeout = setTimeout(action,0);
+        if (mutation.target === label) {
+          return;
+        }
+        if (mutation.type == 'attributes') {
+          clearTimeout(wire_attribute_watcher.timeouts.get(label.parentNode));
+          if (label.querySelector('input[disabled]')) {
+            label.setAttribute('data-disabled','');
+          } else {
+            label.removeAttribute('data-disabled');
           }
+          if (label.querySelector('input[data-weight]')) {
+            label.setAttribute('data-weight',label.querySelector('input[data-weight]').getAttribute('data-weight'));
+            label.style.setProperty('--weight', label.querySelector('input[data-weight]').getAttribute('data-weight'));
+          } else {
+            label.removeAttribute('data-weight');
+            label.style.setProperty('--weight', null);
+          }
+          let timeout = setTimeout(action,0);
+          wire_attribute_watcher.timeouts.set(label.parentNode,timeout);
+        }
       }
   };
+
+  wire_attribute_watcher.timeouts = new WeakMap();
 
   let observer = new MutationObserver(callback);
 
@@ -107,26 +120,32 @@ const upgrade_elements = function(slot) {
   start_angle = parseInt(actual_style.getPropertyValue('--start-angle'));
   end_angle = parseInt(actual_style.getPropertyValue('--end-angle'));
 
-  let all_weights = all_items.map( item => parseInt(item.getAttribute('weight') || '1') );
+  let all_weights = all_items.map( item => Math.abs(parseInt(item.getAttribute('data-weight') || '1')) );
   let sum_weights = all_weights.reduce((acc, val) => acc + val,0);
   let base_delta = (end_angle - start_angle) / sum_weights;
   angle = start_angle;
   let delta = base_delta;
   let notch = parseFloat(actual_style.getPropertyValue('--notch-ratio')||'0');
-  this.sectorpath.parentNode.setAttribute('id','sectors'+all_items.length);
-  if (items.length > 0) {
-    this.sectorpath.setAttribute('d',`M0.5,0.5 m${notch},0 l${0.5-notch},0 A0.5,0.5 0 0,0 ${ang(0.5+0.5*Math.cos(Math.PI/180*delta))},${ang(0.5-0.5*Math.sin(Math.PI/180*delta))} L${ang(0.5+(notch)*Math.cos(Math.PI/180*delta))},${ang(0.5-(notch)*Math.sin(Math.PI/180*delta))} A0.5,0.5 0 0,1 ${0.5+notch},0.5 z`);
+  for (let sector_weight of all_weights) {
+    let sectordelta = sector_weight * delta;
+    if ( ! this.sectorpaths[''+sector_weight]) {
+       this.sectorpaths[''+sector_weight]=this.makeSector();
+    }
+    this.sectorpaths[''+sector_weight].parentNode.setAttribute('id','sectors_sum_'+sum_weights+'_weight_'+sector_weight);
+    if (items.length > 0) {
+      this.sectorpaths[''+sector_weight].setAttribute('d',`M0.5,0.5 m${notch},0 l${0.5-notch},0 A0.5,0.5 0 0,0 ${ang(0.5+0.5*Math.cos(Math.PI/180*sectordelta))},${ang(0.5-0.5*Math.sin(Math.PI/180*sectordelta))} L${ang(0.5+(notch)*Math.cos(Math.PI/180*sectordelta))},${ang(0.5-(notch)*Math.sin(Math.PI/180*sectordelta))} A0.5,0.5 0 0,1 ${0.5+notch},0.5 z`);
+    }
   }
-
   const icon_min_ratio = parseFloat(actual_style.getPropertyValue('--icon-position-ratio'));
 
   let redo_upgrade = () => {
     upgrade_elements.bind(this)(slot);
-    this.style.setProperty('--sectorid','url(#'+this.sectorpath.parentNode.getAttribute('id')+')');
+    this.style.setProperty('--sectorid','url(#'+this.sectorpaths['1'].parentNode.getAttribute('id')+')');
   };
 
   for(let item of all_items.reverse()) {
-    delta = base_delta * parseInt(item.getAttribute('weight') || '1');
+    let item_weight = Math.abs(parseInt(item.getAttribute('data-weight') || '1'));
+    delta = base_delta * item_weight;
     let icon_min = icon_min_ratio;
     let icon_max = 0.5;
 
@@ -153,6 +172,11 @@ const upgrade_elements = function(slot) {
     item.style.transitionDelay = `${str(transition_delay)}s`;
     item.style.transition = `transform ${str(max_time)}s`;
     item.style.transform = 'scale(0.001)';
+    if (item.hasAttribute('data-weight')) {
+      item.style.setProperty('--sectorid', 'url(#'+this.sectorpaths[item_weight+''].parentNode.getAttribute('id')+')');
+    } else {
+      item.style.setProperty('--sectorid',null);
+    }
     transition_delay+= 0.1;
     max_time -= 0.1;
     let classname = `rot${str(angle)}`;
@@ -163,7 +187,10 @@ const upgrade_elements = function(slot) {
 
     all_styles.push(basic_styles);
     angle += delta;
-    wire_attribute_watcher(item, redo_upgrade);
+    if ( ! item.wired ) {
+      wire_attribute_watcher(item, redo_upgrade);
+    }
+    item.wired = true;
   }
   this.hoverstyles.innerHTML = all_styles.join('\n');
   // let temp_template = document.createElement('template');
@@ -203,18 +230,25 @@ class PieMenu extends WrapHTML {
 
     let sectorsvg = this.shadowRoot.getElementById('sectorsvg');
     let targetsector = this.parentNode.appendChild(this.parentNode.ownerDocument.importNode(sectorsvg,true));
-    this.sectorpath = targetsector.firstElementChild.firstElementChild.firstElementChild;
+    this.sectorpaths = {};
+    this.sectorpaths['1'] = targetsector.firstElementChild.firstElementChild.firstElementChild;
 
     let slot = this.shadowRoot.getElementById('items');
     upgrade_elements.bind(this)(slot);
 
-    this.style.setProperty('--sectorid','url(#'+this.sectorpath.parentNode.getAttribute('id')+')');
+    this.style.setProperty('--sectorid','url(#'+this.sectorpaths['1'].parentNode.getAttribute('id')+')');
 
     slot.addEventListener('slotchange', upgrade_elements.bind(this,slot));
     slot.addEventListener('slotchange', () => {
-      this.style.setProperty('--sectorid','url(#'+this.sectorpath.parentNode.getAttribute('id')+')');
+      this.style.setProperty('--sectorid','url(#'+this.sectorpaths['1'].parentNode.getAttribute('id')+')');
     });
 
+  }
+
+  makeSector() {
+    let sectorsvg = this.shadowRoot.getElementById('sectorsvg');
+    let targetsector = this.parentNode.appendChild(this.parentNode.ownerDocument.importNode(sectorsvg,true));
+    return targetsector.firstElementChild.firstElementChild.firstElementChild;
   }
 
   clear() {
