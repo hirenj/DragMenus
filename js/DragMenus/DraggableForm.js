@@ -142,6 +142,17 @@ const wire_menu_events = (piemenu) => {
 
     piemenu.addEventListener('dragover', (ev) => {
       ev.preventDefault();
+      let targ = ev.target;
+      if ( ! (targ instanceof HTMLLabelElement) ) {
+        return;
+      }
+      for (let sib of targ.parentNode.children) {
+        if (sib !== targ) {
+          sib.classList.remove('hover');
+        } else {
+          sib.classList.add('hover');
+        }
+      }
     });
     piemenu.addEventListener('dragleave', (ev) => {
       if (ev.relatedTarget !== piemenu) {
