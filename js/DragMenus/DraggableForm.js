@@ -1,4 +1,4 @@
-/* globals HTMLLabelElement,HTMLInputElement,Event,window,document */
+/* globals HTMLLabelElement,HTMLInputElement,Event,MouseEvent,window,document */
 'use strict';
 
 const wire_form_startdrag = (form) => {
@@ -83,11 +83,7 @@ const wire_menu_events = (piemenu) => {
         }
 
 
-        var event = new Event('click',{bubbles: true});
-        event.pageX = ev.pageX;
-        event.pageY = ev.pageY;
-        event.clientX = ev.clientX;
-        event.clientY = ev.clientY;
+        var event = new MouseEvent('click',{bubbles: true, clientX: ev.clientX, clientY: ev.clientY, screenX: ev.screenX, screenY: ev.screenY });
 
         last_selected.control.dispatchEvent(event);
 
@@ -131,11 +127,7 @@ const wire_menu_events = (piemenu) => {
         return;
       }
 
-      var event = new Event('click',{bubbles: true});
-      event.pageX = ev.pageX;
-      event.pageY = ev.pageY;
-      event.clientX = ev.clientX;
-      event.clientY = ev.clientY;
+      var event = new MouseEvent('click',{bubbles: true, clientX: ev.clientX, clientY: ev.clientY, screenX: ev.screenX, screenY: ev.screenY });
 
       last_selected.control.dispatchEvent(event);
     });
