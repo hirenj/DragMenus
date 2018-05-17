@@ -177,6 +177,16 @@ class DraggableForm {
     form.clear = () => {
       clear_menus(form);
     };
+    Object.defineProperty(form, 'active_center', {
+      get: () => {
+        let actives = form.querySelector('x-piemenu[active]');
+        if ( ! actives ) {
+          return;
+        }
+        let rect = actives.getBoundingClientRect();
+        return { left: rect.left + 0.5*rect.width, top: rect.top + 0.5*rect.height, r: 0.5*rect.width };
+      }
+    });
   }
 }
 
