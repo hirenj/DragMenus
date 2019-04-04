@@ -18,7 +18,7 @@
   },
   "scripts": {
     "jshint-pre-commit": "./scripts/jshint-pre-commit.sh",
-    "validate": "npm ls",
+    "validate": "pnpm ls",
     "lint": "jshint ."
   },
   "repository": {
