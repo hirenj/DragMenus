@@ -83,7 +83,7 @@ const wire_menu_events = (piemenu) => {
         }
 
 
-        var event = new MouseEvent('click',{bubbles: true, clientX: ev.clientX, clientY: ev.clientY, screenX: ev.screenX, screenY: ev.screenY });
+        var event = new MouseEvent('click',{bubbles: true, clientX: ev.clientX, clientY: ev.clientY-window.scrollY, screenX: ev.screenX, screenY: ev.screenY });
 
         last_selected.control.dispatchEvent(event);
 

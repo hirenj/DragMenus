@@ -11,10 +11,7 @@
   },
   "devDependencies": {
     "jshint": "^2.8.0",
-    "precommit-hook": "^3.0.0",
-    "babelify": "^10.0.0",
-    "@babel/preset-env": "^7.4.3",
-    "@babel/core" : "^7.0.0"
+    "precommit-hook": "^3.0.0"
   },
   "scripts": {
     "jshint-pre-commit": "./scripts/jshint-pre-commit.sh",
@@ -26,7 +23,9 @@
     "url": "git@github.com:hirenj/DragMenus.git"
   },
   "browserify": {
-    "transform": ["babelify"]
+    "transform": [
+      "babelify"
+    ]
   },
   "author": "",
   "license": "TBD",
