@@ -1,6 +1,8 @@
 /* globals HTMLLabelElement,HTMLInputElement,Event,MouseEvent,window,document */
 'use strict';
 
+const timeout_symbol = Symbol('menu_timeout');
+
 const wire_form_startdrag = (form) => {
   form.addEventListener('dragstart', evt => {
     if (evt.__target) {
@@ -26,6 +28,9 @@ const wire_form_enddrag = (form) => {
 };
 
 const clear_menus = (form) => {
+  if (form[timeout_symbol]) {
+    clearTimeout(form[timeout_symbol]);
+  }
   let menus = form.querySelectorAll('x-piemenu');
   for (let menu of menus) {
     menu.removeAttribute('active');
@@ -65,9 +70,9 @@ const wire_menu_events = (piemenu) => {
         }
       }
 
-      if (piemenu.form.menu_timeout) {
+      if (piemenu.form[timeout_symbol]) {
         // Also clear this out for a dragend or a dragleave
-        clearTimeout(piemenu.form.menu_timeout);
+        clearTimeout(piemenu.form[timeout_symbol]);
       }
 
       let nextmenu = piemenu.getRootNode().getElementById(piemenu.getAttribute('data-next'));
@@ -76,7 +81,7 @@ const wire_menu_events = (piemenu) => {
         return;
       }
 
-      piemenu.form.menu_timeout = setTimeout( () => {
+      piemenu.form[timeout_symbol] = setTimeout( () => {
 
         if ( ! last_selected ) {
           return;
@@ -101,7 +106,7 @@ const wire_menu_events = (piemenu) => {
         ev.preventDefault();
       }
 
-      clearTimeout(piemenu.form.menu_timeout);
+      clearTimeout(piemenu.form[timeout_symbol]);
       let sizing = piemenu.getBoundingClientRect();
       piemenu.removeAttribute('active');
       let nextmenu = piemenu.getRootNode().getElementById(piemenu.getAttribute('data-next'));

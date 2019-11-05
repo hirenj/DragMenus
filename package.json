@@ -10,7 +10,10 @@
     "debug-any-level": "^0.3.0"
   },
   "devDependencies": {
-    "jshint": "^2.8.0",
+    "@babel/core": "^7.0.0",
+    "@babel/preset-env": "^7.4.3",
+    "babelify": "^10.0.0",
+    "jshint": "^2.10.2",
     "precommit-hook": "^3.0.0"
   },
   "scripts": {
