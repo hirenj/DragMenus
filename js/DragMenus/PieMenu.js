@@ -177,6 +177,7 @@ const upgrade_elements = function(slot) {
     } else {
       item.style.setProperty('--sectorid',null);
     }
+    item.style.setProperty('--slice-background-rotate-angle',`${str(90-Math.abs(angle))}deg`);
     transition_delay+= 0.1;
     max_time -= 0.1;
     let classname = `rot${str(angle)}`;

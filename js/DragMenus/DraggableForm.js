@@ -63,11 +63,17 @@ const wire_menu_events = (piemenu) => {
       }
       piemenu.form[last_selected_symbol] = targ;
 
+      let nextmenu = piemenu.getRootNode().getElementById(piemenu.getAttribute('data-next'));
+
       for (let sib of targ.parentNode.children) {
         if (sib !== targ) {
+          sib.classList.remove('dragover');
           sib.classList.remove('hover');
         } else {
           sib.classList.add('hover');
+          if (nextmenu) {
+            sib.classList.add('dragover');
+          }
         }
       }
 
@@ -76,7 +82,6 @@ const wire_menu_events = (piemenu) => {
         clearTimeout(piemenu.form[timeout_symbol]);
       }
 
-      let nextmenu = piemenu.getRootNode().getElementById(piemenu.getAttribute('data-next'));
 
       if (! nextmenu ) {
         return;
