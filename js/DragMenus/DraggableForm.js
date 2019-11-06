@@ -38,7 +38,6 @@ const clear_menus = (form) => {
 };
 
 const wire_form_reset = (form) => {
-  console.log('Wiring reset',form);
   form.addEventListener('finished', (evt) => {
     evt.preventDefault();
     return false;
