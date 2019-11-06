@@ -2,6 +2,7 @@
 'use strict';
 
 const timeout_symbol = Symbol('menu_timeout');
+const last_selected_symbol = Symbol('last_selected');
 
 const wire_form_startdrag = (form) => {
   form.addEventListener('dragstart', evt => {
@@ -28,6 +29,7 @@ const wire_form_enddrag = (form) => {
 };
 
 const clear_menus = (form) => {
+  form[last_selected_symbol] = null;
   if (form[timeout_symbol]) {
     clearTimeout(form[timeout_symbol]);
   }
@@ -49,17 +51,17 @@ const wire_form_reset = (form) => {
 };
 
 const wire_menu_events = (piemenu) => {
-  let last_selected = null;
+  piemenu.form[last_selected_symbol] = null;
   piemenu.addEventListener('dragenter', (ev) => {
 
       let targ = ev.target;
       if ( ! (targ instanceof HTMLLabelElement) ) {
         return;
       }
-      if (targ === last_selected) {
+      if (targ === piemenu.form[last_selected_symbol]) {
         return;
       }
-      last_selected = targ;
+      piemenu.form[last_selected_symbol] = targ;
 
       for (let sib of targ.parentNode.children) {
         if (sib !== targ) {
@@ -81,17 +83,16 @@ const wire_menu_events = (piemenu) => {
       }
 
       piemenu.form[timeout_symbol] = setTimeout( () => {
-
-        if ( ! last_selected ) {
+        if ( ! piemenu.form[last_selected_symbol] ) {
           return;
         }
 
 
         var event = new MouseEvent('click',{bubbles: true, clientX: ev.clientX, clientY: ev.clientY-window.scrollY, screenX: ev.screenX, screenY: ev.screenY });
 
-        last_selected.control.dispatchEvent(event);
+        piemenu.form[last_selected_symbol].control.dispatchEvent(event);
 
-        last_selected = null;
+        piemenu.form[last_selected_symbol] = null;
       },700);
     });
     piemenu.addEventListener('click', (ev) => {
@@ -133,7 +134,7 @@ const wire_menu_events = (piemenu) => {
 
       var event = new MouseEvent('click',{bubbles: true, clientX: ev.clientX, clientY: ev.clientY, screenX: ev.screenX, screenY: ev.screenY });
 
-      last_selected.control.dispatchEvent(event);
+      piemenu.form[last_selected_symbol].control.dispatchEvent(event);
     });
 
     piemenu.addEventListener('dragover', (ev) => {
@@ -154,7 +155,7 @@ const wire_menu_events = (piemenu) => {
       if (ev.relatedTarget !== piemenu) {
         return;
       }
-      last_selected = null;
+      piemenu.form[last_selected_symbol] = null;
       piemenu.removeAttribute('active');
       piemenu.clear();
     });
