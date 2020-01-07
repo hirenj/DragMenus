@@ -127,7 +127,7 @@ const wire_menu_events = (piemenu) => {
       let zoom = 1;
       // nextmenu.style.transformOrigin = `${left_pos}px ${top_pos}px`;
       nextmenu.style.transform = (ev.isTrusted || (vp_zoom > 1)) ? piemenu.style.transform : `scale(${zoom}) translate(${left_pos}px,${top_pos}px)`;
-      nextmenu.setAttribute('active',true);
+      nextmenu.setAttribute('active',null);
       nextmenu.clear();
     },{capture: false});
 
