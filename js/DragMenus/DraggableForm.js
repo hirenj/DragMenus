@@ -113,7 +113,9 @@ const wire_menu_events = (piemenu) => {
 
       clearTimeout(piemenu.form[timeout_symbol]);
       let sizing = piemenu.getBoundingClientRect();
-      piemenu.removeAttribute('active');
+      setTimeout( () => {
+        piemenu.removeAttribute('active');
+      },100);
       let nextmenu = piemenu.getRootNode().getElementById(piemenu.getAttribute('data-next'));
       if (! nextmenu ) {
         var event = new Event('finished',{bubbles: true});
@@ -129,7 +131,7 @@ const wire_menu_events = (piemenu) => {
       nextmenu.style.transform = (ev.isTrusted || (vp_zoom > 1)) ? piemenu.style.transform : `scale(${zoom}) translate(${left_pos}px,${top_pos}px)`;
       piemenu.form[timeout_symbol] = setTimeout( () => {
         nextmenu.setAttribute('active',null);
-      },0);
+      },100);
       nextmenu.clear();
     },{capture: false});
 
