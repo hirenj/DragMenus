@@ -1,4 +1,4 @@
-/* globals HTMLLabelElement,HTMLInputElement,Event,MouseEvent,window,document */
+/* globals HTMLLabelElement,HTMLInputElement,Event,MouseEvent,window */
 'use strict';
 
 const timeout_symbol = Symbol('menu_timeout');
@@ -112,7 +112,7 @@ const wire_menu_events = (piemenu) => {
       }
 
       clearTimeout(piemenu.form[timeout_symbol]);
-      let sizing = piemenu.getBoundingClientRect();
+      // let sizing = piemenu.getBoundingClientRect();
       setTimeout( () => {
         piemenu.removeAttribute('active');
       },100);
@@ -122,13 +122,13 @@ const wire_menu_events = (piemenu) => {
         piemenu.form.dispatchEvent(event);
         return;
       }
-      let vp_zoom = 1/parseFloat((window.innerWidth / document.documentElement.clientWidth).toFixed(2));
-      // console.log(ev.pageX,ev.pageY,ev.clientX,ev.clientY,vp_zoom);
-      let left_pos = Math.round(ev.pageX)-0.5*sizing.width;
-      let top_pos = Math.round(ev.pageY)-0.5*sizing.height;
-      let zoom = 1;
+      // let vp_zoom = 1/parseFloat((window.innerWidth / document.documentElement.clientWidth).toFixed(2));
+      // // console.log(ev.pageX,ev.pageY,ev.clientX,ev.clientY,vp_zoom);
+      // let left_pos = Math.round(ev.pageX)-0.5*sizing.width;
+      // let top_pos = Math.round(ev.pageY)-0.5*sizing.height;
+      // let zoom = 1;
       // nextmenu.style.transformOrigin = `${left_pos}px ${top_pos}px`;
-      nextmenu.style.transform = (ev.isTrusted || (vp_zoom > 1)) ? piemenu.style.transform : `scale(${zoom}) translate(${left_pos}px,${top_pos}px)`;
+      nextmenu.style.transform = piemenu.style.transform; //((!ev.isTrusted) || (vp_zoom > 1)) ? piemenu.style.transform : `scale(${zoom}) translate(${left_pos}px,${top_pos}px)`;
       piemenu.form[timeout_symbol] = setTimeout( () => {
         nextmenu.setAttribute('active',null);
       },100);
