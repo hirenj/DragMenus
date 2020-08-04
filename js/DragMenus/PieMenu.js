@@ -5,6 +5,8 @@ import * as debug from 'debug-any-level';
 
 const module_string='glycanjs:piemenu';
 
+import { generate_clip_path } from './clipsectors';
+
 const log = debug(module_string);
 
 const PRECISION = 1;
@@ -51,13 +53,6 @@ tmpl.innerHTML = `
   </style>
   <style id="angles">
   </style>
-  <svg id="sectorsvg" width="0" height="0">
-  <defs>
-  <clipPath id="sectorWeight1" clipPathUnits="objectBoundingBox">
-    <path fill="none" stroke="#111" stroke-width="0.01" d="M0.5,0.5 m0.2,0 l0.3,0 A0.5,0.5 0 0,0 0.75,0.06699 L0.6,0.326 A0.5,0.5 0 0,1 0.7,0.5 z"></path>
-  </clipPath>
-  </defs>
-  </svg>
   <slot id="items"></slot>
 `;
 
@@ -126,21 +121,11 @@ const upgrade_elements = function(slot) {
   angle = start_angle;
   let delta = base_delta;
   let notch = parseFloat(actual_style.getPropertyValue('--notch-ratio')||'0');
-  for (let sector_weight of all_weights) {
-    let sectordelta = sector_weight * delta;
-    if ( ! this.sectorpaths[''+sector_weight]) {
-       this.sectorpaths[''+sector_weight]=this.makeSector();
-    }
-    this.sectorpaths[''+sector_weight].parentNode.setAttribute('id','sectors_sum_'+sum_weights+'_weight_'+sector_weight);
-    if (items.length > 0) {
-      this.sectorpaths[''+sector_weight].setAttribute('d',`M0.5,0.5 m${notch},0 l${0.5-notch},0 A0.5,0.5 0 0,0 ${ang(0.5+0.5*Math.cos(Math.PI/180*sectordelta))},${ang(0.5-0.5*Math.sin(Math.PI/180*sectordelta))} L${ang(0.5+(notch)*Math.cos(Math.PI/180*sectordelta))},${ang(0.5-(notch)*Math.sin(Math.PI/180*sectordelta))} A0.5,0.5 0 0,1 ${0.5+notch},0.5 z`);
-    }
-  }
+
   const icon_min_ratio = parseFloat(actual_style.getPropertyValue('--icon-position-ratio'));
 
   let redo_upgrade = () => {
     upgrade_elements.bind(this)(slot);
-    this.style.setProperty('--sectorid','url(#'+this.sectorpaths['1'].parentNode.getAttribute('id')+')');
   };
 
   for(let item of all_items.reverse()) {
@@ -173,9 +158,9 @@ const upgrade_elements = function(slot) {
     item.style.transition = `transform ${str(max_time)}s`;
     item.style.transform = 'scale(0.001)';
     if (item.hasAttribute('data-weight')) {
-      item.style.setProperty('--sectorid', 'url(#'+this.sectorpaths[item_weight+''].parentNode.getAttribute('id')+')');
+      item.style.setProperty('--sectorid', generate_clip_path(notch,1,item_weight,sum_weights,start_angle,end_angle));
     } else {
-      item.style.setProperty('--sectorid',null);
+      item.style.setProperty('--sectorid', generate_clip_path(notch,1,item_weight,sum_weights,start_angle,end_angle));
     }
     item.style.setProperty('--slice-background-rotate-angle',`${str(90-Math.abs(angle))}deg`);
     transition_delay+= 0.1;
@@ -229,27 +214,16 @@ class PieMenu extends WrapHTML {
       this.hoverstyles.setAttribute('type','text/css');
     }
 
-    let sectorsvg = this.shadowRoot.getElementById('sectorsvg');
-    let targetsector = this.parentNode.appendChild(this.parentNode.ownerDocument.importNode(sectorsvg,true));
-    this.sectorpaths = {};
-    this.sectorpaths['1'] = targetsector.firstElementChild.firstElementChild.firstElementChild;
-
     let slot = this.shadowRoot.getElementById('items');
     upgrade_elements.bind(this)(slot);
 
-    this.style.setProperty('--sectorid','url(#'+this.sectorpaths['1'].parentNode.getAttribute('id')+')');
+    this.style.setProperty('--sectorid',generate_clip_path(0,1,1,1,0,90));
 
     slot.addEventListener('slotchange', upgrade_elements.bind(this,slot));
     slot.addEventListener('slotchange', () => {
-      this.style.setProperty('--sectorid','url(#'+this.sectorpaths['1'].parentNode.getAttribute('id')+')');
+      this.style.setProperty('--sectorid',generate_clip_path(0,1,1,1,0,90));
     });
 
-  }
-
-  makeSector() {
-    let sectorsvg = this.shadowRoot.getElementById('sectorsvg');
-    let targetsector = this.parentNode.appendChild(this.parentNode.ownerDocument.importNode(sectorsvg,true));
-    return targetsector.firstElementChild.firstElementChild.firstElementChild;
   }
 
   clear() {
