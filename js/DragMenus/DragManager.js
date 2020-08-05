@@ -1,9 +1,7 @@
 /* globals document,Event,window */
 'use strict';
 
-import * as DragDropTouchClass from '../../lib/dragdroptouch';
-
-const DragDropTouch = DragDropTouchClass.DragDropTouch;
+import { DragDropTouch } from '../../lib/dragdroptouch';
 
 const shim_dispatch = function(e,type,target) {
   let related = null;
