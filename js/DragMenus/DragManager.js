@@ -1,7 +1,43 @@
 /* globals document,Event,window */
 'use strict';
 
-import { DragDropTouch } from '../../lib/dragdroptouch';
+import { DragDropTouch } from '../../lib/dragdroptouch.js';
+
+
+const SingletonSymbol = Symbol('instance');
+
+class ShadowDragDropTouch extends DragDropTouch {
+  constructor(shadow) {
+    let temp_instance = DragDropTouch._instance;
+    delete DragDropTouch._instance;
+    super();
+    DragDropTouch._instance = temp_instance;
+
+    this._lastClick = 0;
+    // enforce singleton pattern
+    if (shadow[SingletonSymbol]) {
+        throw 'DragDropTouch instance already created.';
+    }
+    // detect passive event support
+    // https://github.com/Modernizr/Modernizr/issues/1894
+    var supportsPassive = false;
+    document.addEventListener('test', function () { }, {
+        get passive() {
+            supportsPassive = true;
+            return true;
+        }
+    });
+    // listen to touch events
+    if ('ontouchstart' in document) {
+        var d = document, ts = this._touchstart.bind(this), tm = this._touchmove.bind(this), te = this._touchend.bind(this), opt = supportsPassive ? { passive: false, capture: false } : false;
+        shadow.addEventListener('touchstart', ts, opt);
+        shadow.addEventListener('touchmove', tm, opt);
+        shadow.addEventListener('touchend', te);
+        shadow.addEventListener('touchcancel', te);
+    }
+  }
+
+}
 
 const shim_dispatch = function(e,type,target) {
   let related = null;
@@ -96,5 +132,5 @@ class DragManager {
     wire_global_drag_events.call(this,parent);
   }
 }
-
+export { ShadowDragDropTouch };
 export default DragManager;

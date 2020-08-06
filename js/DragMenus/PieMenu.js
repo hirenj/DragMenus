@@ -5,7 +5,7 @@ import * as debug from 'debug-any-level';
 
 const module_string='glycanjs:piemenu';
 
-import { generate_clip_path } from './clipsectors';
+import { generate_clip_path } from './clipsectors.js';
 
 const log = debug(module_string);
 

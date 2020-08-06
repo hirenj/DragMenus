@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Test Touch</title>
+  <script type="module">
+    import { DraggableForm, DragManager, ShadowDragDropTouch } from '../js/index.js';
+
+    const tmpl = document.createElement('template');
+
+    tmpl.innerHTML = `
+<form>
+  <label draggable="true">
+    This is a SHADOW test
+  <input name="donor" value="NeuAc" type="radio">
+  </label>
+  <label draggable="true">
+    This is another SHADOW test
+  <input name="donor" value="NeuAc" type="radio">
+  </label>
+</form>
+`
+
+    class MyForm extends HTMLElement {
+      connectedCallback() {
+        if (window.ShadyCSS) {
+          ShadyCSS.styleElement(this);
+        }
+        let shadowRoot = this.attachShadow({mode: 'open'});
+        shadowRoot.appendChild(tmpl.content.cloneNode(true));
+        new ShadowDragDropTouch(shadowRoot);
+      }
+    }
+
+    customElements.define('x-form', MyForm);
+  </script>
+</head>
+<body>
+<h1>Basic example</h1>
+<form>
+  <label draggable="true">
+    This is a test
+  <input name="donor" value="NeuAc" type="radio">
+  </label>
+  <label draggable="true">
+    This is another test
+  <input name="donor" value="NeuAc" type="radio">
+  </label>
+</form>
+<h1>Custom element</h1>
+<x-form></x-form>
+</body>
+</html>
