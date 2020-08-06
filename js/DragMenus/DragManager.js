@@ -6,39 +6,6 @@ import { DragDropTouch } from '../../lib/dragdroptouch.js';
 
 const SingletonSymbol = Symbol('instance');
 
-class ShadowDragDropTouch extends DragDropTouch {
-  constructor(shadow) {
-    let temp_instance = DragDropTouch._instance;
-    delete DragDropTouch._instance;
-    super();
-    DragDropTouch._instance = temp_instance;
-
-    this._lastClick = 0;
-    // enforce singleton pattern
-    if (shadow[SingletonSymbol]) {
-        throw 'DragDropTouch instance already created.';
-    }
-    // detect passive event support
-    // https://github.com/Modernizr/Modernizr/issues/1894
-    var supportsPassive = false;
-    document.addEventListener('test', function () { }, {
-        get passive() {
-            supportsPassive = true;
-            return true;
-        }
-    });
-    // listen to touch events
-    if ('ontouchstart' in document) {
-        var d = document, ts = this._touchstart.bind(this), tm = this._touchmove.bind(this), te = this._touchend.bind(this), opt = supportsPassive ? { passive: false, capture: false } : false;
-        shadow.addEventListener('touchstart', ts, opt);
-        shadow.addEventListener('touchmove', tm, opt);
-        shadow.addEventListener('touchend', te);
-        shadow.addEventListener('touchcancel', te);
-    }
-  }
-
-}
-
 const shim_dispatch = function(e,type,target) {
   let related = null;
   if (e && target) {
@@ -61,6 +28,75 @@ const shim_dispatch = function(e,type,target) {
   return false;
 };
 
+class ShadowDragDropTouch extends DragDropTouch {
+  constructor(custom) {
+    let temp_instance = DragDropTouch._instance;
+    delete DragDropTouch._instance;
+    super();
+    DragDropTouch._instance = temp_instance;
+
+    this._lastClick = 0;
+    // enforce singleton pattern
+    if (custom[SingletonSymbol]) {
+        throw 'DragDropTouch instance already created.';
+    }
+
+    custom[SingletonSymbol] = this;
+
+    // detect passive event support
+    // https://github.com/Modernizr/Modernizr/issues/1894
+    var supportsPassive = false;
+    document.addEventListener('test', function () { }, {
+        get passive() {
+            supportsPassive = true;
+            return true;
+        }
+    });
+    // listen to touch events
+    if ('ontouchstart' in document) {
+        var d = document, ts = this._touchstart.bind(this), tm = this._touchmove.bind(this), te = this._touchend.bind(this), opt = supportsPassive ? { passive: false, capture: false } : false;
+        custom.shadowRoot.addEventListener('touchstart', ts, opt);
+        custom.shadowRoot.addEventListener('touchmove', tm, opt);
+        custom.shadowRoot.addEventListener('touchend', te);
+        custom.shadowRoot.addEventListener('touchcancel', te);
+        this.root = custom;
+    }
+  }
+  _getTarget(e) {
+    var pt = this._getPoint(e), el = this.root.shadowRoot.elementFromPoint(pt.x, pt.y);
+    while (el && getComputedStyle(el).pointerEvents == 'none') {
+      el = el.parentElement;
+    }
+    return el;
+  }
+
+  _dispatchEvent(e,type,target) {
+    if (e && target) {
+      let new_ev = shim_dispatch.bind(this)(e,type,this.root);
+      new_ev.shim = true;
+      target.dispatchEvent(new_ev);
+      return new_ev.defaultPrevented;
+    }
+    return false;
+  }
+
+  _destroyImage() {
+    if (this._img) {
+      this.root.shadowRoot.removeChild(this._img);
+    }
+    super._destroyImage();
+  }
+
+  _createImage(e) {
+    super._createImage(e);
+    let bb = this.root.getBoundingClientRect();
+    this._imgOffset.x += bb.x;
+    this._imgOffset.y += bb.y;
+    this.root.shadowRoot.appendChild(this._img);
+  }
+
+}
+
 const uuid =  function() {
   var uuid = '', i, random;
   for (i = 0; i < 32; i++) {
@@ -72,16 +108,6 @@ const uuid =  function() {
     uuid += (i == 12 ? 4 : (i == 16 ? (random & 3 | 8) : random)).toString(16);
   }
   return uuid;
-};
-
-DragDropTouch.prototype._dispatchEvent = function(e,type,target) {
-  if (e && target) {
-    let new_ev = shim_dispatch.bind(this)(e,type,document.body);
-    new_ev.shim = true;
-    target.dispatchEvent(new_ev);
-    return new_ev.defaultPrevented;
-  }
-  return false;
 };
 
 const global_drags = new Map();
