@@ -6,6 +6,16 @@ import { DragDropTouch } from '../../lib/dragdroptouch.js';
 
 const SingletonSymbol = Symbol('instance');
 
+const scroll_parent = (el) => {
+  if (el.parentNode && ((el.parentNode instanceof HTMLElement) || (el.parentNode instanceof ShadowRoot) )) {
+    return scroll_parent(el.parentNode);
+  }
+  if (el.host) {
+    return scroll_parent(el.host);
+  }
+  return el;
+}
+
 const shim_dispatch = function(e,type,target) {
   let related = null;
   if (e && target) {
@@ -82,7 +92,11 @@ class ShadowDragDropTouch extends DragDropTouch {
 
   _destroyImage() {
     if (this._img) {
-      this.root.shadowRoot.removeChild(this._img);
+      if (this._img.parentNode) {
+        this._img.parentNode.removeChild(this._img);
+      } else {
+        this.root.shadowRoot.removeChild(this._img);
+      }
     }
     super._destroyImage();
   }
@@ -90,8 +104,13 @@ class ShadowDragDropTouch extends DragDropTouch {
   _createImage(e) {
     super._createImage(e);
     let bb = this.root.getBoundingClientRect();
-    this._imgOffset.x += bb.x;
-    this._imgOffset.y += bb.y;
+    let scroll_parent_el = scroll_parent(this.root);
+    this._imgOffset.x += bb.x + scroll_parent_el.scrollLeft;
+    this._imgOffset.y += bb.y + scroll_parent_el.scrollTop;
+    if (! this._imgCustom) {
+      let parent_style = this._dragSource.parentNode.style.transform;
+      this._img.style.transform = parent_style.replace(/translate\([^)]*\)/,'');
+    }
     this.root.shadowRoot.appendChild(this._img);
   }
 
