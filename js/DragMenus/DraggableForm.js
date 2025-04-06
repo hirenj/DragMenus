@@ -33,7 +33,7 @@ const clear_menus = (form) => {
   if (form[timeout_symbol]) {
     clearTimeout(form[timeout_symbol]);
   }
-  let menus = form.querySelectorAll('x-piemenu');
+  let menus = form.querySelectorAll('ccg-piemenu');
   for (let menu of menus) {
     menu.removeAttribute('active');
   }
@@ -171,7 +171,7 @@ const wire_menu_events = (piemenu) => {
 };
 
 const upgrade_piemenus = (form) => {
-  let menus = form.querySelectorAll('x-piemenu');
+  let menus = form.querySelectorAll('ccg-piemenu');
   for (let menu of menus) {
     menu.form = form;
     wire_menu_events(menu);
@@ -193,7 +193,7 @@ class DraggableForm {
     };
     Object.defineProperty(form, 'active_center', {
       get: () => {
-        let actives = form.querySelector('x-piemenu[active]');
+        let actives = form.querySelector('ccg-piemenu[active]');
         if ( ! actives ) {
           return;
         }
