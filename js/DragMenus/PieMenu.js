@@ -3,6 +3,8 @@
 
 import * as debug from 'debug-any-level';
 
+const ELEMENT_NAME = 'ccg-piemenu';
+
 const module_string='glycanjs:piemenu';
 
 import { generate_clip_path } from './clipsectors.js';
@@ -169,7 +171,7 @@ const upgrade_elements = function(slot) {
     classname = classname.replace(/[-\.]/g,'x');
     item.setAttribute('class',classname);
 
-    let basic_styles = window.ShadyCSS ? `x-piemenu[active] .${classname} { transform: rotate(${str(-1*angle)}deg) !important; }` : `:host([active]) ::slotted(.${classname}) { transform: rotate(${str(-1*angle)}deg) !important; }`;
+    let basic_styles = window.ShadyCSS ? `ccg-piemenu[active] .${classname} { transform: rotate(${str(-1*angle)}deg) !important; }` : `:host([active]) ::slotted(.${classname}) { transform: rotate(${str(-1*angle)}deg) !important; }`;
 
     all_styles.push(basic_styles);
     angle += delta;
@@ -181,7 +183,7 @@ const upgrade_elements = function(slot) {
   this.hoverstyles.innerHTML = all_styles.join('\n');
   // let temp_template = document.createElement('template');
   // temp_template.innerHTML = '<style type="text/css">'+all_styles.join('\n')+'</style>';
-  // ShadyCSS.prepareTemplate(temp_template,'x-piemenu');
+  // ShadyCSS.prepareTemplate(temp_template,'ccg-piemenu');
   // this.hoverstyles.innerHTML = temp_template.content.cloneNode(true).textContent;
 };
 
@@ -190,7 +192,7 @@ function WrapHTML() { return Reflect.construct(HTMLElement, [], Object.getProtot
 Object.setPrototypeOf(WrapHTML.prototype, HTMLElement.prototype);
 Object.setPrototypeOf(WrapHTML, HTMLElement);
 if (window.ShadyCSS) {
-  ShadyCSS.prepareTemplate(tmpl,'x-piemenu');
+  ShadyCSS.prepareTemplate(tmpl,'ccg-piemenu');
 }
 
 class PieMenu extends WrapHTML {
@@ -238,6 +240,6 @@ PieMenu.ChainForm = function(form) {
   Object.getOwnPropertyNames(form.elements).filter( name => ! name.match(/[0-9]+/) );
 };
 
-customElements.define('x-piemenu',PieMenu);
+customElements.define('ccg-piemenu',PieMenu);
 
 export default PieMenu;
